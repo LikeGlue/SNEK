@@ -1,5 +1,7 @@
 ﻿using Raylib_cs;
+using System;
 using System.Numerics;
+using System.Xml.Linq;
 
 public class Enemy
 {
@@ -12,7 +14,13 @@ public class Enemy
     public int round = 1;
     public bool combatOn = false;
     public enum EnemyType { goblin, orc, skeleton } // à intégrer
-    Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250); 
+    Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
+
+    //Combat system
+    public enum CombatState { Combat, Pause, Leave, NextRound }
+
+    public CombatState currentState = CombatState.Combat;
+
 
     public Enemy(Grid<bool> grid) // ** warning présent **
     {
@@ -54,7 +62,7 @@ public class Enemy
         }
     }
 
-    public void Combat(Player player, Score score)
+    public void Combat(Player player, Potion potion, Score score)
     {
         Console.WriteLine("Combat started");
         combatOn = true;
@@ -80,7 +88,6 @@ public class Enemy
                     player.takeDamage();
                 }
 
-                // TO DO *** enlever un segment par dégât
                 Console.WriteLine($"You are hit and take {enemyDmg} damage.");
             }
             if (player.playerHp <= 0)
@@ -92,20 +99,30 @@ public class Enemy
             if (enemyHp <= 0)
             {
                 Console.WriteLine("Enemy slained!");
-                Respawn();
+                Coordinates[] arrayTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).ToArray();
+                Respawn(arrayTemp);
                 score.AddScore(50);
                 player.Resume();
                 enemyHp = 2;
                 round = 1;
-                //snake.isMoving = true;
                 combatOn = false;
             }
         }
     }
+    public void Respawn(Coordinates[] preventCoordinates) // passer tableau de coordonnées interdites en paramètre (perso, ennemis, etc.)
+                                                          // utiliser methode queue pour retourner tableau - boucle while tant que coordonnées de body et ennemis non atteints.
+                                                          // Concatenation de tableau 
 
-    public void Respawn()
     {
-        coordinates = Coordinates.Random(grid.columns, grid.rows);
+        Coordinates newCoordinate;
+        do
+        {
+            newCoordinate = Coordinates.Random(grid.columns, grid.rows);
+
+        } while (Array.Exists(preventCoordinates, c => c.Equals(newCoordinate)));
+
+
+        coordinates = newCoordinate;
         GetEnemyType();
     }
 

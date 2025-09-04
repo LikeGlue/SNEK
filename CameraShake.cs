@@ -27,6 +27,5 @@ public class CameraShake
             camera2D.Offset.X = (float)random.NextDouble() * shakeMagnitude;
             camera2D.Offset.Y = (float)random.NextDouble() * shakeMagnitude;
         }
-        Console.WriteLine($"CAM SHAKE timer: {timer}");
     }  
 }

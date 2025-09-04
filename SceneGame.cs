@@ -18,13 +18,13 @@ public class SceneGame : Scene
     private string gameMessage;
     private int gameMessagePos;
 
+    
     //CAM
     Camera2D camera = new Camera2D();
     CameraShake camShake = new CameraShake();
 
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 20, null, 250);
     GameOver gameOver = new GameOver();
-
 
     private bool isRunning; // Game loop
     
@@ -33,15 +33,12 @@ public class SceneGame : Scene
 
     public SceneGame()
     {
-
         grid = new Grid<bool>(gridWidth, gridHeight, gridSize, new Vector2(gridX, gridY));
         player = new Player(new Coordinates(gridWidth/2, gridHeight/2), grid);
         potion = new Potion(grid);
         enemy = new Enemy(grid);
         moveTimer = new Timer((float)player.moveSpeed, OnMoveTimerStarted);
         isRunning = true;     
-
-
     }
      
     public override void Load()
@@ -49,6 +46,12 @@ public class SceneGame : Scene
         Console.WriteLine("Loading game...");
         gameMessage = "Fight your way out of the dungeon...";
         enemy.GetEnemyType();
+        Coordinates[] arrayPotionTemp = player.GetBodyCoordinates().Concat(enemy.GetCoordinatesArray()).ToArray();
+        potion.Respawn(arrayPotionTemp);
+        Coordinates[] arrayEnemyTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).ToArray();
+        enemy.Respawn(arrayEnemyTemp);
+
+
         gameMessagePos = gridHeight * gridSize + gridSize;
         camera.Target = new Vector2(0, 0);
         camera.Offset = new Vector2(0, 0);
@@ -66,6 +69,7 @@ public class SceneGame : Scene
             {
                 Console.WriteLine("Game Over");
                 isRunning = false;
+                player.Pause();
             }
 
             if (player.IsCollidingWithPotion(potion))
@@ -76,31 +80,22 @@ public class SceneGame : Scene
                 potion.Respawn(arrayTemp);
                 player.Grow();
                 player.SpeedUp();
-                // To Do: Game controller (add score(1000))
-                if (player.playerHp < player.playerMaxHp)
-                {
-                    gameMessage = $"You gain an extra HP.";
-                
-                }
-                else
-                {
-                    gameMessage = $"Your HP is already full.";
-                }
+
+                if (player.playerHp < player.playerMaxHp) { gameMessage = $"You gain an extra HP.";}
+                else {gameMessage = $"Your HP is already full.";}
             }
 
             if (player.IsCollidingWithEnemy(enemy))
             {
-            
+                camShake.StartShake(0.15f, 3f);
+                
+
                 player.Pause();
-                enemy.Combat(player, score);
-                if (player.playerHp <= 0)
-                {
-                    isRunning = false;
-                }
+                enemy.Combat(player,potion,score);
+                if (player.playerHp <= 0) {isRunning = false;}
                 gameMessage = $"Incoming {enemy.currentEnemy}";
             }
         }
-
     }
 
     public override void Update(float deltaTime)
@@ -115,7 +110,7 @@ public class SceneGame : Scene
 
     public override void Draw()
     {
-
+        
         Raylib.BeginMode2D(camera);
         grid.Draw();
         player.Draw();
@@ -150,4 +145,3 @@ public class SceneGame : Scene
     }
 }
 
-public enum CombatStates { start, round, escape, end }

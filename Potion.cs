@@ -15,7 +15,14 @@ public class Potion
         coordinates = Coordinates.Random(grid.columns, grid.rows);
     }
 
-    
+    public Coordinates[] GetCoordinatesArray()
+    {
+        Coordinates[] array = { coordinates };
+        return array;
+
+    }
+
+
     public void Respawn(Coordinates[] preventCoordinates) // passer tableau de coordonnées interdites en paramètre (perso, ennemis, etc.)
                           // utiliser methode queue pour retourner tableau - boucle while tant que coordonnées de body et ennemis non atteints.
                           // Concatenation de tableau 
