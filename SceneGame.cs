@@ -3,9 +3,11 @@ using System.Numerics;
 
 public class SceneGame : Scene
 {
+    const int screenWidth = 800;
+    const int screenHeight = 480;
     private Grid<bool> grid;
-    private Snake snake;
-    private Apple apple;
+    private Player player;
+    private Potion potion;
     private Enemy enemy;
     private Score score = new Score();
     private int gridWidth = 15;
@@ -15,18 +17,31 @@ public class SceneGame : Scene
     private int gridY = 40;
     private string gameMessage;
     private int gameMessagePos;
-    Font gameFont = Raylib.LoadFontEx("alagard.ttf", 20, null, 250);
 
+    //CAM
+    Camera2D camera = new Camera2D();
+    CameraShake camShake = new CameraShake();
+
+    Font gameFont = Raylib.LoadFontEx("alagard.ttf", 20, null, 250);
+    GameOver gameOver = new GameOver();
+
+
+    private bool isRunning; // Game loop
+    
+    
     private Timer moveTimer;
 
     public SceneGame()
     {
 
         grid = new Grid<bool>(gridWidth, gridHeight, gridSize, new Vector2(gridX, gridY));
-        snake = new Snake(new Coordinates(gridWidth/2, gridHeight/2), grid);
-        apple = new Apple(grid);
+        player = new Player(new Coordinates(gridWidth/2, gridHeight/2), grid);
+        potion = new Potion(grid);
         enemy = new Enemy(grid);
-        moveTimer = new Timer((float)snake.moveSpeed, OnMoveTimerStarted);
+        moveTimer = new Timer((float)player.moveSpeed, OnMoveTimerStarted);
+        isRunning = true;     
+
+
     }
      
     public override void Load()
@@ -35,60 +50,87 @@ public class SceneGame : Scene
         gameMessage = "Fight your way out of the dungeon...";
         enemy.GetEnemyType();
         gameMessagePos = gridHeight * gridSize + gridSize;
+        camera.Target = new Vector2(0, 0);
+        camera.Offset = new Vector2(0, 0);
+        camera.Rotation = 0f;
+        camera.Zoom = 1f;
     }
 
     public void OnMoveTimerStarted()
     {
-        snake.Move();
-
-        if (snake.IsCollidingWithSelf() || snake.IsOutOfBounds())
+        if (isRunning == true)
         {
-            Console.WriteLine("Game Over");
-        }
+            player.Move();
 
-        if (snake.IsCollidingWithApple(apple))
-        {
-            gameMessage = $"You drank a potion and gained an extra HP.";
-            apple.Respawn();
-            snake.Grow();
-            snake.SpeedUp();
-            // Game controller to do(add score(1000))
-        }
+            if (player.IsCollidingWithSelf() || player.IsOutOfBounds())
+            {
+                Console.WriteLine("Game Over");
+                isRunning = false;
+            }
 
-        if (snake.IsCollidingWithEnemy(enemy))
-        {
+            if (player.IsCollidingWithPotion(potion))
+            {
+                camShake.StartShake(0.15f, 2f);
+                Coordinates[] arrayTemp = player.GetBodyCoordinates().Concat(enemy.GetCoordinatesArray()).ToArray();
+                
+                potion.Respawn(arrayTemp);
+                player.Grow();
+                player.SpeedUp();
+                // To Do: Game controller (add score(1000))
+                if (player.playerHp < player.playerMaxHp)
+                {
+                    gameMessage = $"You gain an extra HP.";
+                
+                }
+                else
+                {
+                    gameMessage = $"Your HP is already full.";
+                }
+            }
+
+            if (player.IsCollidingWithEnemy(enemy))
+            {
             
-            snake.Pause();
-            enemy.Combat(snake, score);
-            gameMessage = $"Incoming {enemy.currentEnemy}";
+                player.Pause();
+                enemy.Combat(player, score);
+                if (player.playerHp <= 0)
+                {
+                    isRunning = false;
+                }
+                gameMessage = $"Incoming {enemy.currentEnemy}";
+            }
         }
-
-        //if (snake. > 6)
-        //{
-        //    snake.playerHp = 6;
-        //}
 
     }
 
     public override void Update(float deltaTime)
     {
-
+        camShake.UpdateShake(ref camera);
         moveTimer.Update(deltaTime);
 
         //Console.WriteLine($"Updating game w/ DT {deltaTime}...");
-        snake.ChangeDirection(GetInputDirection());
-        
+        player.ChangeDirection(GetInputDirection());
+        gameOver.Update();
     }
 
     public override void Draw()
     {
+
+        Raylib.BeginMode2D(camera);
         grid.Draw();
-        snake.Draw();
+        player.Draw();
         enemy.Draw();
-        apple.Draw();
+        potion.Draw();
         score.Draw();
         Raylib.DrawTextEx(gameFont, gameMessage, new Vector2(gridX, gameMessagePos), 20,1, Color.RayWhite);
         Raylib.DrawRectangleLines(gridX, gridY, gridWidth * gridSize, gridHeight * gridSize, Color.RayWhite);
+
+
+        if (isRunning == false)
+        {
+            gameOver.Draw();
+        }
+        Raylib.EndMode2D();
     }
 
     public override void UnLoad()
@@ -107,3 +149,5 @@ public class SceneGame : Scene
         return dir;
     }
 }
+
+public enum CombatStates { start, round, escape, end }

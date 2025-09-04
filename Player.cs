@@ -2,7 +2,15 @@
 using System;
 using System.Numerics;
 
-public class Snake
+//####################################
+//TO DO:
+// - Turn based combat
+// - Character generation
+// - Fix Overlap
+//####################################
+
+
+public class Player
 {
     Grid<bool> grid;
 
@@ -18,11 +26,14 @@ public class Snake
     public int playerHp => body.Count();    
     public int playerMaxHp = 6;
     public int heroDmg;
-    public int snakeSegments;
+    public int playerSegments;
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
 
+    public string name;
+    public string weapon;
 
-    public Snake(Coordinates start, Grid<bool> grid, int startSize = 6)
+
+    public Player(Coordinates start, Grid<bool> grid, int startSize = 6)
     {
         this.grid = grid;
         for (int i = startSize - 1; i >= 0; i--)
@@ -31,6 +42,36 @@ public class Snake
         }
         nextDirection = direction;
     }
+
+    public string NameGeneration()
+    {
+        var random = new Random();
+
+        var listName1 = new List<string> { "Hil", "Val", "Gol", "Gar", "Bro", "Del" };
+        var listName2 = new List<string> { "", "de", "ro", "do", "du", "vo" };
+        var listName3 = new List<string> { "ric", "val", "gol", "gar", "gor", "sil" };
+
+        int index1 = random.Next(listName1.Count);
+        int index2 = random.Next(listName2.Count);
+        int index3 = random.Next(listName3.Count);
+
+        string name = listName1[index1] + listName2[index2] + listName3[index3];
+
+        return name;
+    }
+
+    public string WeaponGeneration()
+    {
+        var random = new Random();
+
+        var weaponList = new List<string> { "Dagger", "Sword", "Axe", "Flail", "Whip", "Bow" };
+        int weaponIndex = random.Next(weaponList.Count);
+
+        string weapon = weaponList[weaponIndex];
+        return weapon;
+    }
+
+
 
     public Coordinates lastOrNull()
     {
@@ -116,9 +157,9 @@ public class Snake
         }
     }
 
-    public bool IsCollidingWithApple(Apple apple)
+    public bool IsCollidingWithPotion(Potion potion)
     {
-        return head == apple.coordinates;
+        return head == potion.coordinates;
     }
 
     public bool IsCollidingWithEnemy(Enemy enemy)
@@ -167,6 +208,10 @@ public class Snake
         nextDirection = newDirection;
     }
 
+    public Coordinates[] GetBodyCoordinates()
+    {
+        return body.ToArray();
+    }
 
 
 }

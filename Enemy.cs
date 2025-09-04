@@ -14,11 +14,18 @@ public class Enemy
     public enum EnemyType { goblin, orc, skeleton } // à intégrer
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250); 
 
-    public Enemy(Grid<bool> grid)
+    public Enemy(Grid<bool> grid) // ** warning présent **
     {
         this.grid = grid;
         coordinates = Coordinates.Random(grid.columns, grid.rows);
         GetEnemyType();
+    }
+
+    public Coordinates[] GetCoordinatesArray()
+    {
+        Coordinates[] array = { coordinates };
+        return array;
+        
     }
 
     public void GetEnemyType()
@@ -47,7 +54,7 @@ public class Enemy
         }
     }
 
-    public void Combat(Snake snake, Score score)
+    public void Combat(Player player, Score score)
     {
         Console.WriteLine("Combat started");
         combatOn = true;
@@ -56,7 +63,7 @@ public class Enemy
             Random rnd = new Random();
             int playerDmg = rnd.Next(1, 7);
             int playerRoll = rnd.Next(1, 7);
-            Console.WriteLine($"Combat round {round} | Hero hp: {snake.playerHp} | Enemy hp: {enemyHp} | Enemy Type: {currentEnemy} ");
+            Console.WriteLine($"Combat round {round} | Hero hp: {player.playerHp} | Enemy hp: {enemyHp} | Enemy Type: {currentEnemy} ");
             Console.WriteLine($"You roll {playerRoll}...");
             round += 1;
 
@@ -70,13 +77,13 @@ public class Enemy
             {
                 for (int i = 1; i <= enemyDmg; i++)
                 {
-                    snake.takeDamage();
+                    player.takeDamage();
                 }
 
                 // TO DO *** enlever un segment par dégât
                 Console.WriteLine($"You are hit and take {enemyDmg} damage.");
             }
-            if (snake.playerHp <= 0)
+            if (player.playerHp <= 0)
             {
                 Console.WriteLine("You died!");
                 Console.WriteLine("Game Over");
@@ -87,7 +94,7 @@ public class Enemy
                 Console.WriteLine("Enemy slained!");
                 Respawn();
                 score.AddScore(50);
-                snake.Resume();
+                player.Resume();
                 enemyHp = 2;
                 round = 1;
                 //snake.isMoving = true;
