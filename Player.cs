@@ -5,8 +5,8 @@ using System.Numerics;
 //####################################
 //TO DO:
 // - Turn based combat
-// - Character generation
-// - Fix Overlap
+// - Move enemies
+// - Add dungeon door or treasure on condition
 //####################################
 
 
@@ -19,7 +19,7 @@ public class Player
     Coordinates nextDirection;
 
     public Coordinates head => lastOrNull(); //body.Last();
-    public double moveSpeed { get; private set; } = 0.5;
+    public double moveSpeed { get; private set; } = 0.3;
     private bool isGrowing = false;
     public bool isMoving = true;
     public bool isFighting = false;
@@ -42,36 +42,6 @@ public class Player
         }
         nextDirection = direction;
     }
-
-    public string NameGeneration()
-    {
-        var random = new Random();
-
-        var listName1 = new List<string> { "Hil", "Val", "Gol", "Gar", "Bro", "Del" };
-        var listName2 = new List<string> { "", "de", "ro", "do", "du", "vo" };
-        var listName3 = new List<string> { "ric", "val", "gol", "gar", "gor", "sil" };
-
-        int index1 = random.Next(listName1.Count);
-        int index2 = random.Next(listName2.Count);
-        int index3 = random.Next(listName3.Count);
-
-        string name = listName1[index1] + listName2[index2] + listName3[index3];
-
-        return name;
-    }
-
-    public string WeaponGeneration()
-    {
-        var random = new Random();
-
-        var weaponList = new List<string> { "Dagger", "Sword", "Axe", "Flail", "Whip", "Bow" };
-        int weaponIndex = random.Next(weaponList.Count);
-
-        string weapon = weaponList[weaponIndex];
-        return weapon;
-    }
-
-
 
     public Coordinates lastOrNull()
     {
@@ -151,7 +121,7 @@ public class Player
         foreach (Coordinates segment in body)
         {
             Vector2 position = grid.GridToWorld(segment);
-            Raylib.DrawTextEx(gameFont, "@", new Vector2((int)position.X, (int)position.Y), grid.cellSize,1, Color.White);
+            Raylib.DrawTextEx(gameFont, "@", new Vector2((int)position.X + 6, (int)position.Y - 3), grid.cellSize,1, Color.White);
             Raylib.DrawTextEx(gameFont,$"Hero hp: {playerHp}/{playerMaxHp} ", new Vector2(150, 10), 20,1, Color.White);
 
         }

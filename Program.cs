@@ -1,5 +1,4 @@
 ﻿using Raylib_cs;
-using System.Numerics;
 
 const int screenWidth = 800;
 const int screenHeight = 480;

@@ -15,7 +15,7 @@ public class SceneMenu : Scene
     {
         if (Raylib.IsKeyPressed(KeyboardKey.Space))
         {
-            SceneManager.Load<SceneGame>();
+            SceneManager.Load<SceneIntro>();
         }
     }
 
@@ -23,6 +23,7 @@ public class SceneMenu : Scene
     {
         //Console.WriteLine("Drawing menu...");
         Raylib.DrawTextEx(fontTTF,"SNEK", new Vector2(70, 150), fontTTF.BaseSize, -15, Color.Red);
+        
 
     }
 
