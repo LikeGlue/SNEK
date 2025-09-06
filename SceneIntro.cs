@@ -75,7 +75,7 @@ public class SceneIntro : Scene
         //Console.WriteLine(framesCounter);
         if(Raylib.IsKeyDown(KeyboardKey.Space))
         {
-            framesCounter += 8;
+            framesCounter += 12;
         }
 
         else

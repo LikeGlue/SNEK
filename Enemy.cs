@@ -1,6 +1,7 @@
 ﻿using Raylib_cs;
 using System;
 using System.Numerics;
+using System.Reflection;
 using System.Xml.Linq;
 
 public class Enemy
@@ -10,9 +11,13 @@ public class Enemy
     public string currentEnemy;
     public int enemyHp;
     public int enemyDmg;
+    public int enemyPts;
     public string enemyName = "E";
     public int round = 1;
     public bool combatOn = false;
+    public Coordinates playerCoordinates;
+    public string gameMessage;
+    
     public enum EnemyType { goblin, orc, skeleton } // à intégrer
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
 
@@ -22,12 +27,13 @@ public class Enemy
     public CombatState currentState = CombatState.Combat;
 
 
-    public Enemy(Grid<bool> grid) // ** warning présent **
+    public Enemy(Grid<bool> grid)
     {
         this.grid = grid;
         coordinates = Coordinates.Random(grid.columns, grid.rows);
         GetEnemyType();
     }
+
 
     public Coordinates[] GetCoordinatesArray()
     {
@@ -39,31 +45,56 @@ public class Enemy
     public void GetEnemyType()
     {
         var random = new Random();
-        var enemyList = new List<string> { "goblin", "orc", "skeleton" };
+        var enemyList = new List<string> { "goblin", "orc", "skeleton", "giant spider", "vampire", "troll" };
         int index = random.Next(enemyList.Count);
         currentEnemy = enemyList[index];
-        if (currentEnemy == "goblin")
+        if (currentEnemy == "skeleton")
+        {
+            enemyHp = 1;
+            enemyDmg = 1;
+            enemyPts = 10;
+            enemyName = "S";
+        }
+        else if (currentEnemy == "goblin")
         {
             enemyHp = 2;
             enemyDmg = 2;
+            enemyPts = 20;
             enemyName = "G";
         }
         else if (currentEnemy == "orc")
         {
             enemyHp = 3;
             enemyDmg = 3;
+            enemyPts = 30;
             enemyName = "O";
         }
-        else if (currentEnemy == "skeleton")
+        else if (currentEnemy == "giant spider")
         {
-            enemyHp = 1;
-            enemyDmg = 1;
-            enemyName = "S";
+            enemyHp = 3;
+            enemyDmg = 3;
+            enemyPts = 40;
+            enemyName = "X";
+        }
+        else if (currentEnemy == "vampire")
+        {
+            enemyHp = 4;
+            enemyDmg = 4;
+            enemyPts = 50;
+            enemyName = "V";
+        }
+        else if (currentEnemy == "troll")
+        {
+            enemyHp = 4;
+            enemyDmg = 4;
+            enemyPts = 60;
+            enemyName = "T";
         }
     }
 
     public void Combat(Player player, Potion potion, Score score)
     {
+        
         Console.WriteLine("Combat started");
         combatOn = true;
         while (combatOn)
@@ -98,10 +129,17 @@ public class Enemy
             }
             if (enemyHp <= 0)
             {
-                Console.WriteLine("Enemy slained!");
+                if (currentEnemy == "skeleton") { score.AddScore(10); }
+                else if (currentEnemy == "goblin") { score.AddScore(20); }
+                else if (currentEnemy == "orc") { score.AddScore(30); }
+                else if (currentEnemy == "giant spider") { score.AddScore(40); }
+                else if (currentEnemy == "vampire") { score.AddScore(50); }
+                else if (currentEnemy == "troll") { score.AddScore(60); }
+                
+                gameMessage = "Enemy slained!";
                 Coordinates[] arrayTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).ToArray();
                 Respawn(arrayTemp);
-                score.AddScore(50);
+                
                 player.Resume();
                 enemyHp = 2;
                 round = 1;
@@ -109,10 +147,7 @@ public class Enemy
             }
         }
     }
-    public void Respawn(Coordinates[] preventCoordinates) // passer tableau de coordonnées interdites en paramètre (perso, ennemis, etc.)
-                                                          // utiliser methode queue pour retourner tableau - boucle while tant que coordonnées de body et ennemis non atteints.
-                                                          // Concatenation de tableau 
-
+    public void Respawn(Coordinates[] preventCoordinates) 
     {
         Coordinates newCoordinate;
         do

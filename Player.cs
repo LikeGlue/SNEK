@@ -67,11 +67,11 @@ public class Player
 
     public void Pause()
     {
-        //StopBodyTrail();
+        
         isFighting = true;
         isGrowing = false;
         isMoving = false;
-        //nextDirection = Coordinates.zero;
+        
     }
 
     public void Resume()
@@ -130,6 +130,11 @@ public class Player
     public bool IsCollidingWithPotion(Potion potion)
     {
         return head == potion.coordinates;
+    }
+
+    public bool IsCollidingWithTreasure(Treasure treasure)
+    {
+        return head == treasure.coordinates;
     }
 
     public bool IsCollidingWithEnemy(Enemy enemy)

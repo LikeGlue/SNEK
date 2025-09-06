@@ -4,11 +4,12 @@ using Raylib_cs;
 public class Score
 {
     private int currentScore;
+    
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
 
-    public void AddScore(int points)
+    public void AddScore(int score)
     {
-        currentScore += points;
+        currentScore += score;
     }
 
     public int GetScore()
