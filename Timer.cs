@@ -70,6 +70,5 @@ public class Timer
     {
         return elapsedTime >= duration;
     }
-
 }
 

@@ -70,14 +70,14 @@ public struct Coordinates // struct => copie et non pointeur de mémoire
 
     public override bool Equals(object? obj)
     {
-        if (obj is Coordinates other) // On vérifie le type d'un élément et le mettre dans une variable, et vérifier si il est égal à l'objet
+        if (obj is Coordinates other)
         {
             return this == other;
         }
         return false;
     }
 
-    public override int GetHashCode() // **info** cette surcharge était proposée par VS pour enlever l'alerte sur la classe Coordinates 
+    public override int GetHashCode() 
     {
         return base.GetHashCode();
     }

@@ -54,8 +54,10 @@ public class SceneIntro : Scene
         name = NameGeneration();
         weapon = WeaponGeneration();
         introMessage =
-            $"You are {name},          \n" +
-            $"and with your {weapon} at hand       \n" +
+            $"\t\t\t\t You are {name}.          \n" +
+            $"\n" +
+            $"With your {weapon} at hand and your\n" +
+            $"WASD / ARROW keys for your wits      \n" +
             $"you take on this deep dark dungeon\n" +
             $"filled with bounty, gold and glory.       \n" +
             $"\n" +
@@ -67,7 +69,6 @@ public class SceneIntro : Scene
         startMessage = "Press ENTER to start your journey";
         speedMessage = "Hold SPACE";
         startMessageBool = false;
-
     }
 
     public override void Update(float deltaTime)
@@ -75,7 +76,7 @@ public class SceneIntro : Scene
         //Console.WriteLine(framesCounter);
         if(Raylib.IsKeyDown(KeyboardKey.Space))
         {
-            framesCounter += 12;
+            framesCounter += 20;
         }
 
         else
@@ -83,14 +84,13 @@ public class SceneIntro : Scene
             framesCounter += 1;
         }
 
-        if (framesCounter >= 900)
+        if (framesCounter >= 1100)
         {
             startMessageBool = true;
             if (Raylib.IsKeyPressed(KeyboardKey.Enter))
             {
                 SceneManager.Load<SceneGame>();
             }
-
         }
 
         blinkTimer += deltaTime;
@@ -103,21 +103,16 @@ public class SceneIntro : Scene
 
     public override void Draw()
     {
-        //Console.WriteLine("Drawing menu...");
-        //Raylib.DrawText(message.SubText(0, framesCounter/10), 70, 150, 40, Color.White);
-        
         Raylib.DrawTextEx(introFont, introMessage.SubText(0, framesCounter/4),new Vector2(150,100), 25,1, Color.White);
         if (startMessageBool == true && textVisible)
         {
-            Raylib.DrawTextEx(introFont, startMessage, new Vector2(170, 400), 25, 1, Color.Gold);
+            Raylib.DrawTextEx(introFont, startMessage, new Vector2(170, 420), 25, 1, Color.Gold);
         }
 
         if (startMessageBool == false)
         {
-            Raylib.DrawTextEx(introFont, speedMessage, new Vector2(680,450), 15, 1, Color.Gray);
+            Raylib.DrawTextEx(introFont, speedMessage, new Vector2(680,460), 15, 1, Color.Gray);
         }
-
-
     }
 
     public override void UnLoad()

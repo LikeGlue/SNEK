@@ -8,7 +8,6 @@ public class Potion
     //private float radius = 0.4f;
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
 
-
     public Potion(Grid<bool> grid)
     {
         this.grid = grid;
@@ -19,9 +18,7 @@ public class Potion
     {
         Coordinates[] array = { coordinates };
         return array;
-
     }
-
 
     public void Respawn(Coordinates[] preventCoordinates) 
     {
@@ -31,7 +28,6 @@ public class Potion
             newCoordinate = Coordinates.Random(grid.columns, grid.rows);
 
         } while (Array.Exists(preventCoordinates, c => c.Equals(newCoordinate)));
-
 
         coordinates = newCoordinate;
     }

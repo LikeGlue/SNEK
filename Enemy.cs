@@ -1,9 +1,5 @@
 ﻿using Raylib_cs;
-using System;
 using System.Numerics;
-using System.Reflection;
-using System.Xml.Linq;
-
 public class Enemy
 {
     public Coordinates coordinates { get; private set; }
@@ -21,12 +17,6 @@ public class Enemy
     public enum EnemyType { goblin, orc, skeleton } // à intégrer
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
 
-    //Combat system
-    public enum CombatState { Combat, Pause, Leave, NextRound }
-
-    public CombatState currentState = CombatState.Combat;
-
-
     public Enemy(Grid<bool> grid)
     {
         this.grid = grid;
@@ -34,12 +24,10 @@ public class Enemy
         GetEnemyType();
     }
 
-
     public Coordinates[] GetCoordinatesArray()
     {
         Coordinates[] array = { coordinates };
         return array;
-        
     }
 
     public void GetEnemyType()
@@ -94,7 +82,6 @@ public class Enemy
 
     public void Combat(Player player, Potion potion, Score score)
     {
-        
         Console.WriteLine("Combat started");
         combatOn = true;
         while (combatOn)
@@ -140,8 +127,7 @@ public class Enemy
                 Coordinates[] arrayTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).ToArray();
                 Respawn(arrayTemp);
                 
-                player.Resume();
-                enemyHp = 2;
+                
                 round = 1;
                 combatOn = false;
             }
@@ -168,5 +154,3 @@ public class Enemy
         Raylib.DrawTextEx(gameFont, enemyName, new Vector2((int)worldPosition.X, (int)worldPosition.Y), grid.cellSize,1, Color.Red);
     }
 }
-
-//public enum EnemyType { goblin, orc, skeleton }

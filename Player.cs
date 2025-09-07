@@ -1,15 +1,5 @@
 ﻿using Raylib_cs;
-using System;
 using System.Numerics;
-
-//####################################
-//TO DO:
-// - Turn based combat
-// - Move enemies
-// - Add dungeon door or treasure on condition
-//####################################
-
-
 public class Player
 {
     Grid<bool> grid;
@@ -17,6 +7,7 @@ public class Player
     Queue<Coordinates> body = new Queue<Coordinates>(); // Corps du snake
     Coordinates direction = Coordinates.right;
     Coordinates nextDirection;
+    SceneIntro sceneIntro = new SceneIntro();
 
     public Coordinates head => lastOrNull(); //body.Last();
     public double moveSpeed { get; private set; } = 0.3;
@@ -24,7 +15,7 @@ public class Player
     public bool isMoving = true;
     public bool isFighting = false;
     public int playerHp => body.Count();    
-    public int playerMaxHp = 6;
+    public int playerMaxHp = 8;
     public int heroDmg;
     public int playerSegments;
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
@@ -73,16 +64,6 @@ public class Player
         isMoving = false;
         
     }
-
-    public void Resume()
-    {
-        isGrowing = false;
-        isMoving = true;
-        isFighting = false;
-        //nextDirection = direction;
-    }
-
-
     public void Move()
     {
         if (body.Count > 0)
@@ -122,9 +103,9 @@ public class Player
         {
             Vector2 position = grid.GridToWorld(segment);
             Raylib.DrawTextEx(gameFont, "@", new Vector2((int)position.X + 6, (int)position.Y - 3), grid.cellSize,1, Color.White);
-            Raylib.DrawTextEx(gameFont,$"Hero hp: {playerHp}/{playerMaxHp} ", new Vector2(150, 10), 20,1, Color.White);
 
         }
+        Raylib.DrawTextEx(gameFont,$"Hero HP: {playerHp}/{playerMaxHp} | DMG: +{heroDmg} ", new Vector2(150, 10), 20,1, Color.White);
     }
 
     public bool IsCollidingWithPotion(Potion potion)
@@ -145,10 +126,6 @@ public class Player
     public bool IsCollidingWithSelf()
     {
         return body.Count != body.Distinct().Count(); 
-        // In C#, Distinct().Count() is a method chain used to count the number of unique elements in a collection,
-        // such as an array or a list. The Distinct() method filters out duplicate values,
-        // and Count() then returns the total number of these unique elements.
-        // Ici, la méthode vérifie si les éléments ne sont pas egaux => *il faut que la classe implémente bien l'override de Equals*
     }
 
     public bool IsOutOfBounds()
@@ -167,7 +144,7 @@ public class Player
 
     public void SpeedUp()
     {
-        moveSpeed *= 0.9; // couplé à un timer, + le timer est court + c'est rapide - *à tester*
+        moveSpeed *= 0.5; // couplé à un timer, + le timer est court + c'est rapide - *à tester*
     }
 
     public void ChangeDirection(Coordinates newDirection)
@@ -187,6 +164,4 @@ public class Player
     {
         return body.ToArray();
     }
-
-
 }

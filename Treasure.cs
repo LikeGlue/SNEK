@@ -7,7 +7,6 @@ public class Treasure
     private Grid<bool> grid;
 
     public string currentTreasure;
-    //private float radius = 0.4f;
     Font gameFont = Raylib.LoadFontEx("alagard.ttf", 50, null, 250);
 
 
@@ -29,12 +28,12 @@ public class Treasure
     {
         Coordinates[] array = { coordinates };
         return array;
-
     }
 
 
     public void Respawn(Coordinates[] preventCoordinates)
     {
+        Console.WriteLine("Treasure SPAWN");
         Coordinates newCoordinate;
         do
         {

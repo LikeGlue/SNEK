@@ -11,8 +11,7 @@ public class SceneGame : Scene
     private Enemy enemy;
     private Treasure treasure;
     private Score score = new Score();
-    private int lastScore = 0;
-    private int scoreToReach;
+    private float scoreToReach;
     private int currentScore;
     private int gridWidth = 15;
     private int gridHeight = 8;
@@ -20,7 +19,14 @@ public class SceneGame : Scene
     private int gridX = 40;
     private int gridY = 40;
     private string gameMessage;
+    private string gameMessageT; // message du trésor
     private int gameMessagePos;
+    private int gameMessageTPosX;
+    private float scoreIncrement;
+    private float scoreIncrementCoeff;
+    private Color gameMessageColor;
+    private bool gameMessagePotion;
+    
 
     //CAM
     Camera2D camera = new Camera2D();
@@ -44,34 +50,38 @@ public class SceneGame : Scene
         moveTimer = new Timer((float)player.moveSpeed, OnMoveTimerStarted);
         isRunning = true;
         isTreasure = false;
+
     }
      
     public override void Load()
     {
-        Console.WriteLine("Loading game...");
         gameMessage = "Fight your way out of the dungeon...";
         enemy.GetEnemyType();
-        Coordinates[] arrayPotionTemp = player.GetBodyCoordinates().Concat(enemy.GetCoordinatesArray()).ToArray();
+        Coordinates[] arrayPotionTemp = player.GetBodyCoordinates().Concat(enemy.GetCoordinatesArray()).Concat(treasure.GetCoordinatesArray()).ToArray();
         potion.Respawn(arrayPotionTemp);
-        Coordinates[] arrayEnemyTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).ToArray();
+        Coordinates[] arrayEnemyTemp = potion.GetCoordinatesArray().Concat(player.GetBodyCoordinates()).Concat(treasure.GetCoordinatesArray()).ToArray();
         enemy.Respawn(arrayEnemyTemp);
-        isTreasure = false;
-        currentScore = score.GetScore();
         gameMessagePos = gridHeight * gridSize + gridSize;
+        gameMessageTPosX = screenWidth/2 - 100;
         camera.Target = new Vector2(0, 0);
         camera.Offset = new Vector2(0, 0);
         camera.Rotation = 0f;
         camera.Zoom = 1f;
+        scoreToReach = 100;
+        scoreIncrement = 200;
+        scoreIncrementCoeff = 1.2f;
+
     }
 
     public void OnMoveTimerStarted()
-    {   
+    {
+        currentScore = score.GetScore();
+
         if (isRunning == true)
         {
-            isTreasure = false;
+        
             player.Move();
-            TreasureSpawnCheck(currentScore);
-            gameMessage = $"Incoming {enemy.currentEnemy}";
+            
 
             if (player.IsCollidingWithSelf() || player.IsOutOfBounds())
             {
@@ -80,55 +90,63 @@ public class SceneGame : Scene
                 player.Pause();
             }
 
-            if (player.IsCollidingWithTreasure(treasure))
+            if (player.IsCollidingWithTreasure(treasure) && isTreasure == true )
             {
-                
+                camShake.StartShake(0.15f, 3f);
                 treasure.GetTreasureType();
+                scoreToReach += scoreIncrement * scoreIncrementCoeff;
+                player.SpeedUp();
+                gameMessagePotion = false;
+
+
                 if (treasure.currentTreasure == "legendary")
                 {
                     player.heroDmg += 1;
-                    gameMessage = $"Treasure! you found a legendary weapon giving you +{player.heroDmg} damage";
+                    gameMessageT = $"Treasure: Blessing! your weapon \n gets you +{player.heroDmg} damage";
                 }
                 else if (treasure.currentTreasure == "potion")
                 {
-                    var random = new Random();
-                    int newHP = random.Next(1, 7);
-                    for (int i = 1; i <= newHP; i++)
+                    player.playerMaxHp++;
+                    for (int i = 1; i <= player.playerMaxHp - player.playerHp; i++)
                     {
-                        if (player.playerHp < player.playerMaxHp)
-                        {
+                        
                             player.Grow();
-                        }
+                        
                     }
-                    gameMessage = $"Treasure! you get {player.playerHp} HP";
+                    gameMessageT = $"Treasure: your Max HP increases by 1";
                 }
                 else if (treasure.currentTreasure == "gold")
                 {
-                    gameMessage = $"Treasure!you get gold!";
+                    
+                    score.AddScore(100);
+                    gameMessageT = $"Treasure: you get 100 coins!";
                 }
-
-                Coordinates[] arrayTreasureTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).Concat(treasure.GetCoordinatesArray()).ToArray();
-                treasure.Respawn(arrayTreasureTemp);
+                if (isTreasure == true)
+                {
+                    Coordinates[] arrayTreasureTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).Concat(treasure.GetCoordinatesArray()).ToArray();
+                    treasure.Respawn(arrayTreasureTemp);
+                }
+                isTreasure = false;
             }
 
             if (player.IsCollidingWithPotion(potion))
             {
+
                 camShake.StartShake(0.15f, 2f);
                 Coordinates[] arrayTemp = player.GetBodyCoordinates().Concat(enemy.GetCoordinatesArray()).ToArray();
                 potion.Respawn(arrayTemp);
                 player.Grow();
                 player.SpeedUp();
-
-                if (player.playerHp < player.playerMaxHp) { gameMessage = $"You gain an extra HP.";}
-                else {gameMessage = $"Your HP is already full.";}
+                gameMessagePotion = true;
+                if (player.playerHp < player.playerMaxHp) { gameMessageT = $"You gain an extra HP.";}
+                else {gameMessageT = $"Your HP is already full, but you still rush";}
             }
 
             if (player.IsCollidingWithEnemy(enemy))
             {
-                camShake.StartShake(0.15f, 3f);
-                
+                camShake.StartShake(0.15f, 5f);
+                player.SpeedUp();
 
-                player.Pause();
                 enemy.Combat(player,potion,score);
                 if (player.playerHp <= 0) {isRunning = false; player.Pause();}
                 
@@ -138,17 +156,9 @@ public class SceneGame : Scene
 
     public void TreasureSpawnCheck(int score)
     {
-        scoreToReach = score / 20;
-        if (scoreToReach > lastScore)
+        if (score >= scoreToReach)
         {
             isTreasure = true;
-            Coordinates[] arrayTreasureTemp = player.GetBodyCoordinates().Concat(potion.GetCoordinatesArray()).Concat(treasure.GetCoordinatesArray()).ToArray();
-            treasure.Respawn(arrayTreasureTemp);
-            lastScore = scoreToReach;
-        }
-        else
-        {
-            isTreasure = false;
         }
     }
 
@@ -157,7 +167,22 @@ public class SceneGame : Scene
         camShake.UpdateShake(ref camera);
         moveTimer.Update(deltaTime);
         player.ChangeDirection(GetInputDirection());
-        gameOver.Update();
+        isTreasure = false;
+        TreasureSpawnCheck(currentScore);
+        if (isRunning == false)
+        {
+            gameOver.Update();
+        }
+        gameMessage = $"Incoming {enemy.currentEnemy}\n" +
+                $"HP: {enemy.enemyHp} | DMG: {enemy.enemyDmg}";
+        if (gameMessagePotion == true)
+        {
+            gameMessageColor = Color.Green;
+        }
+        else
+        {
+            gameMessageColor = Color.Gold;
+        }
     }
 
     public override void Draw()
@@ -168,14 +193,16 @@ public class SceneGame : Scene
         player.Draw();
         enemy.Draw();
         potion.Draw();
+
         if (isTreasure == true)
         {
             treasure.Draw();
         }
+
         score.Draw();
         Raylib.DrawTextEx(gameFont, gameMessage, new Vector2(gridX, gameMessagePos), 20,1, Color.RayWhite);
+        Raylib.DrawTextEx(gameFont, gameMessageT, new Vector2(gameMessageTPosX, gameMessagePos), 20,1, gameMessageColor);
         Raylib.DrawRectangleLines(gridX, gridY, gridWidth * gridSize, gridHeight * gridSize, Color.RayWhite);
-
 
         if (isRunning == false)
         {
@@ -186,7 +213,6 @@ public class SceneGame : Scene
 
     public override void UnLoad()
     {
-        Console.WriteLine("Unloading game...");
     }
 
     private Coordinates GetInputDirection()

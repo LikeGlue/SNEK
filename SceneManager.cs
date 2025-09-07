@@ -2,7 +2,7 @@
 {
     private static Scene? currentScene;
 
-    public static void Load<T>() where T : Scene, new() // Le type générique (T = scene générique par ex.) est -enfant- de Scene , new() pou l'instancier soi-même
+    public static void Load<T>() where T : Scene, new() // Le type générique (T = scene générique par ex.) est -enfant- de Scene , new() pour l'instancier soi-même
     {
         if (currentScene != null) // CurrentScene existe déja alors Unload sinon ordre suivant du code...
         {
