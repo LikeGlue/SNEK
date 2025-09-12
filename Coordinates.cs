@@ -1,6 +1,4 @@
-﻿using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
+﻿using System.Numerics;
 
 public struct Coordinates // struct => copie et non pointeur de mémoire
 {

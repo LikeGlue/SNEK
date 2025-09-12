@@ -8,7 +8,7 @@ public class SceneCredits : Scene
     public override void Load(){}
     public override void Update(float deltaTime)
     {
-        if (Raylib.IsKeyPressed(KeyboardKey.Enter))
+        if (Raylib.IsKeyPressed(KeyboardKey.Space))
         {
             SceneManager.Load<SceneMenu>();
         }

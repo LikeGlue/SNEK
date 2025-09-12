@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.Design;
-
-public class Timer
+﻿public class Timer
 {
     private float elapsedTime = 0f;
     public float duration { get; private set; }
